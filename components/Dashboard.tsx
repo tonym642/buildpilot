@@ -27,7 +27,7 @@ export default function Dashboard({ projects, onOpen, onNew, onDelete }: Dashboa
             {projects.map(p => (
               <div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid ${C.borderSub}` }}>
                 <div style={{ fontWeight: 600, fontSize: 15, color: C.text, cursor: "pointer" }} onClick={() => onOpen(p)}>{p.name}</div>
-                <button onClick={() => onDelete(p.id)} style={{ background: "none", border: "none", color: C.faint, fontSize: 16, cursor: "pointer" }}>✕</button>
+                <button onClick={() => onDelete(p.id)} style={{ background: "none", border: "none", color: C.faint, fontSize: 16, cursor: "pointer" }}></button>
               </div>
             ))}
           </div>

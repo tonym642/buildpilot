@@ -39,7 +39,7 @@ export default function BuildPanel({ isMobile, sections, activeSection, activeSe
             const active = s.id === activeSectionId;
             return (
               <button key={s.id} onClick={() => setActiveSectionId(s.id)} style={{ flexShrink: 0, fontSize: 11, padding: "5px 12px", borderRadius: 20, border: `1px solid ${active ? C.accent : C.border}`, background: active ? C.accentBg : "transparent", color: active ? C.accent : C.muted, fontFamily: C.font, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap" }}>
-                <span style={{ fontSize: 10, color: has ? C.accent : C.faint }}>●</span>{s.title}
+                <span style={{ fontSize: 10, color: has ? C.accent : C.faint }}>5cf</span>{s.title}
               </button>
             );
           })}
@@ -57,32 +57,16 @@ export default function BuildPanel({ isMobile, sections, activeSection, activeSe
                 style={{
                   textAlign: "left",
                   padding: "10px 16px",
-                  background: active ? "rgba(255,255,255,0.72)" : "transparent",
-                  border: "none",
-                  borderLeft: `2px solid ${active ? "#2a2a2a" : "transparent"}`,
-                  color: active ? C.text : C.muted,
-                  fontSize: 13,
-                  fontFamily: C.font,
-                  fontWeight: active ? 500 : 400,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  transition: "all 0.15s ease"
-                }}
-              >
-                <span style={{ fontSize: 7, color: has ? C.accent : C.faint }}>●</span>{s.title}
+                  background: active ? "rgba(255,255,255,0.72)" : "transparent", // ...rest of style
+                }}>
+                <span style={{ fontSize: 10, color: has ? C.accent : C.faint }}>5cf</span>{s.title}
               </button>
             );
           })}
         </div>
       )}
-      <div style={{ flex: 1, padding: isMobile ? "20px 6px 14px 6px" : "24px 28px", overflowY: "auto", WebkitOverflowScrolling: isMobile ? "touch" : undefined }}>
-        {activeSection ? (
-          <div ref={sectionFadeRef} className="fade-in">
-            <SectionEditor section={activeSection} onChange={updateSectionContent} isMobile={isMobile} />
-          </div>
-        ) : <div style={{ color: C.faint, fontSize: 13 }}>{isMobile ? "Select a section above" : "Select a section"}</div>}
+      <div style={{ flex: 1, padding: isMobile ? "18px 16px" : "24px 28px", overflowY: "auto" }}>
+        {activeSection ? <SectionEditor section={activeSection} onChange={updateSectionContent} isMobile={isMobile} /> : <div style={{ color: C.faint, fontSize: 13 }}>Select a section</div>}
       </div>
     </div>
   );

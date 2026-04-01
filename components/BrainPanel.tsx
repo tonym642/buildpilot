@@ -1,4 +1,3 @@
-
 "use client";
 import { useRef } from "react";
 import { C } from "../lib/constants";
@@ -62,82 +61,20 @@ export default function BrainPanel({ isMobile, messages, isThinking, inputVal, s
 					</div>
 				))}
 				{isThinking && (
-					<div style={{ display: "flex", gap: 4, padding: "10px 14px", background: "rgba(247,247,245,0.82)", border: `1px solid ${C.borderSub}` , borderRadius: 12, width: "fit-content" }}>
+					<div style={{ display: "flex", gap: 4, padding: "10px 14px", background: C.accentBg, border: `1px solid ${C.accent}`, borderRadius: 10, width: "fit-content" }}>
 						{[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: C.accent, animation: `pulse 1.2s ${i*0.2}s infinite` }} />)}
 					</div>
 				)}
 				<div ref={chatEndRef} />
 			</div>
-			<div style={{
-				padding: isMobile ? "10px 4px 8px 4px" : "18px",
-				borderTop: `1px solid ${C.borderSub}`,
-				background: "rgba(247,247,245,0.82)",
-				backdropFilter: "blur(18px)",
-				flexShrink: 0,
-				position: isMobile ? "sticky" : undefined,
-				bottom: isMobile ? 0 : undefined,
-				zIndex: isMobile ? 3 : undefined
-			}}>
-				<div style={{
-					display: "flex",
-					gap: isMobile ? 6 : 10,
-					alignItems: "flex-end",
-					background: "rgba(255,255,255,0.72)",
-					border: `1px solid ${C.border}`,
-					borderRadius: isMobile ? 15 : 18,
-					padding: isMobile ? "7px 6px 7px 10px" : "10px 12px",
-					boxShadow: isMobile ? "0 2px 12px rgba(0,0,0,0.03)" : "0 8px 30px rgba(0,0,0,0.04)",
-					width: "100%"
-				}}>
-					<textarea
-						value={inputVal}
-						onChange={e => setInputVal(e.target.value)}
+			<div style={{ padding: isMobile ? "10px 12px" : "12px 16px", borderTop: `1px solid ${C.borderSub}`, flexShrink: 0 }}>
+				<div style={{ display: "flex", gap: 8, alignItems: "flex-end", background: C.panelBg, border: "1px solid #1e1e26", borderRadius: 10, padding: "9px 12px" }}>
+					<textarea value={inputVal} onChange={e => setInputVal(e.target.value)}
 						onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(inputVal); } }}
-						placeholder="Think out loud..."
-						rows={1}
-						style={{
-							flex: 1,
-							background: "none",
-							border: "none",
-							outline: "none",
-							color: C.text,
-							fontSize: isMobile ? 17 : 13,
-							fontFamily: C.font,
-							resize: "none",
-							lineHeight: 1.7,
-							maxHeight: isMobile ? 140 : 96,
-							minHeight: isMobile ? 44 : 0,
-							padding: 0,
-							WebkitTapHighlightColor: "transparent"
-						}}
-						inputMode={isMobile ? "text" : undefined}
-						autoCorrect={isMobile ? "on" : undefined}
-						autoCapitalize={isMobile ? "sentences" : undefined}
-						spellCheck={isMobile}
-					/>
-					<button
-						onClick={() => sendMessage(inputVal)}
-						disabled={isThinking || !inputVal.trim()}
-						style={{
-							background: inputVal.trim() && !isThinking ? C.accent : "#d8d6cf",
-							border: "none",
-							borderRadius: isMobile ? 15 : 12,
-							padding: isMobile ? "12px 16px" : "8px 16px",
-							color: "#fff",
-							fontSize: isMobile ? 17 : 14,
-							fontFamily: C.font,
-							cursor: isThinking ? "not-allowed" : "pointer",
-							fontWeight: 600,
-							opacity: 1,
-							flexShrink: 0,
-							minWidth: isMobile ? 48 : undefined,
-							minHeight: isMobile ? 48 : undefined,
-							marginLeft: isMobile ? 2 : 0,
-							boxShadow: isMobile ? "0 1px 4px rgba(0,0,0,0.03)" : undefined,
-							WebkitTapHighlightColor: "transparent",
-							transition: "all 0.15s ease"
-						}}
-					>
+						placeholder="Think out loud..." rows={1}
+						style={{ flex: 1, background: "none", border: "none", outline: "none", color: C.text, fontSize: 13, fontFamily: C.font, resize: "none", lineHeight: 1.5, maxHeight: 96 }} />
+					<button onClick={() => sendMessage(inputVal)} disabled={isThinking || !inputVal.trim()}
+						style={{ background: C.accent, border: "none", borderRadius: 6, padding: "7px 16px", color: "#0d0d0f", fontSize: 14, fontFamily: C.font, cursor: "pointer", fontWeight: 600, opacity: (!inputVal.trim() || isThinking) ? 0.3 : 1, flexShrink: 0 }}>
 						→
 					</button>
 				</div>
@@ -145,4 +82,3 @@ export default function BrainPanel({ isMobile, messages, isThinking, inputVal, s
 		</div>
 	);
 }
-
