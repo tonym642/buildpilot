@@ -1,11 +1,23 @@
 
-export default function Home() {
-  return (
-    <main style={{ padding: 20 }}>
-      <h1>Build Pilot is live 🚀</h1>
-    </main>
-  );
-}
+"use client";
+import React, { useState, useEffect, useRef } from "react";
+import { supabase } from "./lib/supabaseClient";
+
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Project, Section, Message } from "./lib/types";
+import AuthPanel from "./components/AuthPanel";
+import OnboardingPanel from "./components/OnboardingPanel";
+import Dashboard from "./components/Dashboard";
+import CreateProject from "./components/CreateProject";
+import Workspace from "./components/Workspace";
+import { TEMPLATES } from "./lib/constants";
+import { genId } from "./lib/utils";
+import { persistence } from "./lib/persistence";
+
+export default function Page() {
+  // --- State ---
+  const [session, setSession] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [view, setView] = useState<"dashboard" | "create" | "workspace">("dashboard");
   const [projects, setProjects] = useState<Project[]>([]);
