@@ -19,7 +19,7 @@ export default function AuthPanel({ onSignedIn }: { onSignedIn?: () => void }) {
       setLoading(false);
       return;
     }
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase!.auth.signInWithPassword({
       email,
       password,
     });
@@ -35,7 +35,7 @@ export default function AuthPanel({ onSignedIn }: { onSignedIn?: () => void }) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase!.auth.signUp({ email, password });
     setLoading(false);
     if (error) setError(error.message);
     else setSent(true);
@@ -45,7 +45,7 @@ export default function AuthPanel({ onSignedIn }: { onSignedIn?: () => void }) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const { error } = await supabase!.auth.resetPasswordForEmail(email);
     setLoading(false);
     if (error) setError(error.message);
     else setSent(true);

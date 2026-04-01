@@ -48,12 +48,12 @@ export default function Page() {
     // Supabase auth session
     const getSession = async () => {
       setAuthLoading(true);
-      const { data, error } = await (supabase as SupabaseClient)?.auth.getSession?.() ?? { data: null, error: null };
+      const { data, error } = await (supabase! as SupabaseClient)?.auth.getSession?.() ?? { data: null, error: null };
       if (data?.session) setSession(data.session);
       setAuthLoading(false);
     };
     getSession();
-    const { data: listener } = (supabase as SupabaseClient)?.auth.onAuthStateChange?.((event: string, session: any) => {
+    const { data: listener } = (supabase! as SupabaseClient)?.auth.onAuthStateChange?.((event: string, session: any) => {
       setSession(session);
     }) ?? { data: { subscription: null } };
     return () => {
