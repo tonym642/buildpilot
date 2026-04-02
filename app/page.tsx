@@ -26,6 +26,7 @@ import { persistence } from "../lib/persistence";
     const [sections, setSections] = useState<Section[]>([]);
     const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
     const [createError, setCreateError] = useState<string | null>(null);
+    const [creating, setCreating] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [isThinking, setIsThinking] = useState(false);
     const [inputVal, setInputVal] = useState("");
@@ -107,6 +108,7 @@ import { persistence } from "../lib/persistence";
         setCreateError("Not signed in. Please sign in and try again.");
         return;
       }
+      setCreating(true);
       try {
         const id = genId();
         const now = new Date().toISOString();
@@ -135,8 +137,10 @@ import { persistence } from "../lib/persistence";
         setSections(newSections);
         setActiveSectionId(newSections[0]?.id || null);
         setForm({ name: "", type: "Book", description: "" });
+        setCreating(false);
         setView("workspace");
       } catch (err: any) {
+        setCreating(false);
         setCreateError(err?.message ?? "Failed to create project. Please try again.");
       }
     };
@@ -163,10 +167,7 @@ import { persistence } from "../lib/persistence";
           <Dashboard projects={projects} onOpen={handleOpenProject} onNew={handleNewProject} onDelete={() => {}} />
         )}
         {view === "create" && (
-          <>
-            <CreateProject form={form} setForm={setForm} onCreate={handleCreateProject} onBack={handleBackToDashboard} />
-            {createError && <div style={{ color: "#b00", textAlign: "center", marginTop: 16 }}>{createError}</div>}
-          </>
+          <CreateProject form={form} setForm={setForm} onCreate={handleCreateProject} onBack={handleBackToDashboard} creating={creating} error={createError} />
         )}
         {view === "workspace" && activeProject && (
           <Workspace

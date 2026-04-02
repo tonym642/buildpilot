@@ -8,23 +8,32 @@ interface CreateProjectProps {
   setForm: React.Dispatch<React.SetStateAction<{ name: string; type: TemplateType; description: string }>>;
   onCreate: () => void;
   onBack: () => void;
+  creating?: boolean;
+  error?: string | null;
 }
 
-export default function CreateProject({ form, setForm, onCreate, onBack }: CreateProjectProps) {
+export default function CreateProject({ form, setForm, onCreate, onBack, creating = false, error = null }: CreateProjectProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100vh", background: C.bg, color: C.text, fontFamily: C.font }}>
       <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 18 }}>New Project</div>
       <div style={{ width: 340, maxWidth: "90vw", background: C.panelBg, border: `1px solid ${C.borderSub}`, borderRadius: 18, boxShadow: "0 8px 30px rgba(0,0,0,0.04)", padding: 28 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <input value={form.name} onChange={e => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Project name" style={{ fontSize: 15, padding: "10px 12px", borderRadius: 10, border: `1px solid ${C.border}` , background: "#fff", color: C.text }} />
-          <select value={form.type} onChange={e => setForm((f) => ({ ...f, type: e.target.value as TemplateType }))} style={{ fontSize: 15, padding: "10px 12px", borderRadius: 10, border: `1px solid ${C.border}` , background: "#fff", color: C.text }}>
+          <input value={form.name} onChange={e => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Project name" style={{ fontSize: 15, padding: "10px 12px", borderRadius: 10, border: `1px solid ${C.border}`, background: "#fff", color: C.text }} />
+          <select value={form.type} onChange={e => setForm((f) => ({ ...f, type: e.target.value as TemplateType }))} style={{ fontSize: 15, padding: "10px 12px", borderRadius: 10, border: `1px solid ${C.border}`, background: "#fff", color: C.text }}>
             {Object.keys(TEMPLATES).map(t => <option key={t} value={t}>{t}</option>)}
           </select>
-          <textarea value={form.description} onChange={e => setForm((f) => ({ ...f, description: e.target.value }))} placeholder="Description (optional)" rows={2} style={{ fontSize: 15, padding: "10px 12px", borderRadius: 10, border: `1px solid ${C.border}` , background: "#fff", color: C.text, resize: "none" }} />
+          <textarea value={form.description} onChange={e => setForm((f) => ({ ...f, description: e.target.value }))} placeholder="Description (optional)" rows={2} style={{ fontSize: 15, padding: "10px 12px", borderRadius: 10, border: `1px solid ${C.border}`, background: "#fff", color: C.text, resize: "none" }} />
         </div>
-        <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
-          <button onClick={onBack} style={{ flex: 1, background: C.faint, color: "#fff", border: "none", borderRadius: 10, padding: "10px 0", fontWeight: 600, fontSize: 15, cursor: "pointer" }}>Back</button>
-          <button onClick={onCreate} style={{ flex: 2, background: C.accent, color: "#fff", border: "none", borderRadius: 10, padding: "10px 0", fontWeight: 600, fontSize: 15, cursor: "pointer" }}>Create</button>
+        {error && (
+          <div style={{ marginTop: 14, padding: "10px 12px", borderRadius: 8, background: "#fff0f0", border: "1px solid #f5c0c0", color: "#b04040", fontSize: 13 }}>
+            {error}
+          </div>
+        )}
+        <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+          <button onClick={onBack} disabled={creating} style={{ flex: 1, background: C.faint, color: "#fff", border: "none", borderRadius: 10, padding: "10px 0", fontWeight: 600, fontSize: 15, cursor: creating ? "not-allowed" : "pointer", opacity: creating ? 0.6 : 1 }}>Back</button>
+          <button onClick={onCreate} disabled={creating} style={{ flex: 2, background: C.accent, color: "#fff", border: "none", borderRadius: 10, padding: "10px 0", fontWeight: 600, fontSize: 15, cursor: creating ? "not-allowed" : "pointer", opacity: creating ? 0.7 : 1 }}>
+            {creating ? "Creating…" : "Create"}
+          </button>
         </div>
       </div>
     </div>
