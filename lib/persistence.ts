@@ -21,6 +21,22 @@ export async function getProjects(userId: string): Promise<Project[]> {
   } catch { return []; }
 }
 
+export async function createProject(project: Project, userId: string): Promise<void> {
+  if (supabase && userId) {
+    const { error } = await supabase
+      .from("projects")
+      .insert({ ...project, user_id: userId });
+    if (error) throw new Error(`projects insert failed: ${error.message} (code: ${error.code})`);
+    return;
+  }
+  // localStorage fallback
+  try {
+    const existing: Project[] = JSON.parse(localStorage.getItem("bp_projects") ?? "[]");
+    existing.unshift(project);
+    localStorage.setItem("bp_projects", JSON.stringify(existing));
+  } catch {}
+}
+
 export async function saveProject(project: Project, userId: string): Promise<void> {
   if (supabase && userId) {
     const { error } = await supabase
@@ -77,8 +93,8 @@ export async function saveSections(projectId: string, sections: Section[]): Prom
     const rows = sections.map(s => ({ ...s, project_id: projectId }));
     const { error } = await supabase
       .from("sections")
-      .upsert(rows, { onConflict: "id" });
-    if (error) throw new Error(error.message);
+      .insert(rows);
+    if (error) throw new Error(`sections insert failed: ${error.message} (code: ${error.code})`);
     return;
   }
   try {
@@ -104,6 +120,7 @@ export async function saveMessages(projectId: string, messages: Message[]): Prom
 // ── Legacy object export (keeps any other import sites working) ───────────────
 export const persistence = {
   getProjects,
+  createProject,
   saveProject,
   deleteProject,
   getSections,

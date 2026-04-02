@@ -129,8 +129,8 @@ import { persistence } from "../lib/persistence";
           created_at: now,
           updated_at: now,
         };
-        // Save project first, then sections — await both before navigating
-        await persistence.saveProject(project, userId);
+        // Insert new project, then its sections — await both before navigating
+        await persistence.createProject(project, userId);
         await persistence.saveSections(id, newSections);
         setProjects(prev => [project, ...prev]);
         setActiveProject(project);
