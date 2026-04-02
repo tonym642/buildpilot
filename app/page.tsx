@@ -9,6 +9,7 @@ import OnboardingPanel from "../components/OnboardingPanel";
 import Dashboard from "../components/Dashboard";
 import CreateProject from "../components/CreateProject";
 import Workspace from "../components/Workspace";
+import AvatarMenu from "../components/AvatarMenu";
 import { TEMPLATES } from "../lib/constants";
 import { genId } from "../lib/utils";
 import { persistence } from "../lib/persistence";
@@ -137,8 +138,8 @@ import { persistence } from "../lib/persistence";
     // Signed-in UI
     return (
       <div>
-        <div style={{ display: "flex", justifyContent: "flex-end", padding: "18px 24px 0 0" }}>
-          <button onClick={handleSignOut} style={{ background: "none", border: "none", color: "#888", fontSize: 14, cursor: "pointer", fontWeight: 500, borderRadius: 8, padding: "6px 14px" }}>Sign out</button>
+        <div style={{ position: "fixed", top: 16, right: 20, zIndex: 200 }}>
+          <AvatarMenu session={session} onSignOut={handleSignOut} />
         </div>
         {view === "dashboard" && (
           <Dashboard projects={projects} onOpen={handleOpenProject} onNew={handleNewProject} onDelete={() => {}} />
