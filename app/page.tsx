@@ -156,25 +156,26 @@ Action types: set_content(data:{text}), set_goal(data:{goal}), set_key_points(da
       try {
         const sys = buildSystemPrompt(activeProject, sections, activeSectionId);
         const apiMsgs = nextMessages.slice(-18).map(m => ({ role: m.role, content: m.message }));
-        const res = await fetch("/api/ai", {
+        const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ system: sys, messages: apiMsgs }),
         });
         const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? "API error");
         const aiMsg: Message = {
           id: genId(),
           project_id: activeProject.id,
           role: "assistant",
-          message: data.text || "Let me help you with that.",
+          message: data.message || "Let me help you with that.",
           actions: data.actions || [],
           createdAt: Date.now(),
         };
         setMessages([...nextMessages, aiMsg]);
-      } catch {
+      } catch (err: any) {
         setMessages([...nextMessages, {
           id: genId(), project_id: activeProject.id, role: "assistant",
-          message: "Something went wrong. Please try again.", actions: [], createdAt: Date.now(),
+          message: err?.message ?? "Something went wrong. Please try again.", actions: [], createdAt: Date.now(),
         }]);
       }
       setIsThinking(false);
