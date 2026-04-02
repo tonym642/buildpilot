@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Project, Section, Message } from "../lib/types";
@@ -69,6 +69,10 @@ import { persistence } from "../lib/persistence";
     }, []);
 
     useEffect(() => {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
+    useEffect(() => {
       // Load projects whenever session is available
       const userId = session?.user?.id;
       if (!userId) return;
@@ -99,6 +103,82 @@ import { persistence } from "../lib/persistence";
     };
     const handleNewProject = () => setView("create");
     const handleBackToDashboard = () => setView("dashboard");
+
+    // ── AI helpers ────────────────────────────────────────────────────────────
+    function buildSystemPrompt(project: Project, secs: Section[], currentId: string | null) {
+      const cur = secs.find(s => s.id === currentId);
+      const summaries = secs.map(s => {
+        const c = s.content_json;
+        const preview = c.type === "chapter"
+          ? `goal:${c.goal || "empty"} points:${(c.key_points || []).slice(0, 2).join(",") || "none"}`
+          : c.type === "bullets" ? (c.items || []).slice(0, 3).join(", ") || "empty"
+          : (c.text || "empty").slice(0, 80);
+        return `[${s.title}]: ${preview}`;
+      }).join("\n");
+      return `You are Build Pilot AI for a ${project.type} project called "${project.name}". Description: ${project.description || "none"}.
+Current section: ${cur?.title || "none"}. Content: ${cur ? JSON.stringify(cur.content_json) : "none"}.
+Other sections:\n${summaries}
+
+Respond ONLY with valid JSON (no markdown, no extra text):
+{"text":"2-4 sentence response","actions":[{"label":"Short label","type":"action_type","target_section":"current","data":{}}]}
+Action types: set_content(data:{text}), set_goal(data:{goal}), set_key_points(data:{key_points:[]}), set_bullets(data:{items:[]}), followup, next_section. Max 3 actions.`;
+    }
+
+    const handleAction = useCallback((action: any) => {
+      const targetId = action.target_section === "current"
+        ? activeSectionId
+        : sections.find((s: Section) => s.key === action.target_section)?.id ?? activeSectionId;
+      setSections((prev: Section[]) => prev.map(s => {
+        if (s.id !== targetId) return s;
+        const c = { ...s.content_json };
+        if (action.type === "set_content" && action.data?.text) c.text = action.data.text;
+        if (action.type === "set_goal" && action.data?.goal) c.goal = action.data.goal;
+        if (action.type === "set_key_points" && action.data?.key_points) c.key_points = action.data.key_points;
+        if (action.type === "set_bullets" && action.data?.items) c.items = action.data.items;
+        return { ...s, content_json: c };
+      }));
+      if (action.type === "next_section") {
+        const idx = sections.findIndex((s: Section) => s.id === activeSectionId);
+        if (idx >= 0 && idx < sections.length - 1) setActiveSectionId(sections[idx + 1].id);
+      }
+      if (isMobile && action.type !== "followup") {
+        setTimeout(() => setMobileTab("build"), 250);
+      }
+    }, [activeSectionId, sections, isMobile]);
+
+    const sendMessage = useCallback(async (text: string) => {
+      if (!text.trim() || isThinking || !activeProject) return;
+      const userMsg: Message = { id: genId(), project_id: activeProject.id, role: "user", message: text, createdAt: Date.now() };
+      const nextMessages = [...messages, userMsg];
+      setMessages(nextMessages);
+      setInputVal("");
+      setIsThinking(true);
+      try {
+        const sys = buildSystemPrompt(activeProject, sections, activeSectionId);
+        const apiMsgs = nextMessages.slice(-18).map(m => ({ role: m.role, content: m.message }));
+        const res = await fetch("/api/ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ system: sys, messages: apiMsgs }),
+        });
+        const data = await res.json();
+        const aiMsg: Message = {
+          id: genId(),
+          project_id: activeProject.id,
+          role: "assistant",
+          message: data.text || "Let me help you with that.",
+          actions: data.actions || [],
+          createdAt: Date.now(),
+        };
+        setMessages([...nextMessages, aiMsg]);
+      } catch {
+        setMessages([...nextMessages, {
+          id: genId(), project_id: activeProject.id, role: "assistant",
+          message: "Something went wrong. Please try again.", actions: [], createdAt: Date.now(),
+        }]);
+      }
+      setIsThinking(false);
+    }, [messages, isThinking, activeProject, sections, activeSectionId]);
 
     // Project creation handler
     const handleCreateProject = async () => {
@@ -183,8 +263,8 @@ import { persistence } from "../lib/persistence";
             isThinking={isThinking}
             inputVal={inputVal}
             setInputVal={setInputVal}
-            sendMessage={() => {}}
-            handleAction={() => {}}
+            sendMessage={sendMessage}
+            handleAction={handleAction}
             chatEndRef={chatEndRef}
             updateSectionContent={(updated) => setSections(prev => prev.map(s => s.id === updated.id ? updated : s))}
             sectionFadeRef={sectionFadeRef}
