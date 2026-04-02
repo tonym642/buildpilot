@@ -81,9 +81,10 @@ export default function ProfilePage() {
     const url = urlData.publicUrl;
 
     // Write avatar_url to profiles table (id = auth.uid() satisfies RLS)
+    // email is always included to satisfy the NOT NULL constraint on INSERT
     const { error: profileError } = await supabase
       .from("profiles")
-      .upsert({ id: user.id, avatar_url: url }, { onConflict: "id" });
+      .upsert({ id: user.id, email, avatar_url: url }, { onConflict: "id" });
 
     if (profileError) {
       setProfileMsg({ text: profileError.message, ok: false });
@@ -102,9 +103,10 @@ export default function ProfilePage() {
     setProfileMsg(null);
 
     // Write to profiles table — id must equal auth.uid() to satisfy RLS
+    // email comes from state (set from u.email on mount) to avoid user.email being undefined
     const { error } = await supabase
       .from("profiles")
-      .upsert({ id: user.id, full_name: fullName, email: user.email ?? "" }, { onConflict: "id" });
+      .upsert({ id: user.id, full_name: fullName, email }, { onConflict: "id" });
 
     if (!error) {
       // Keep auth metadata in sync
