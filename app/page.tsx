@@ -104,6 +104,22 @@ import { persistence } from "../lib/persistence";
     const handleNewProject = () => setView("create");
     const handleBackToDashboard = () => setView("dashboard");
 
+    const handleRenameProject = async (id: string, name: string) => {
+      const userId = session?.user?.id;
+      const project = projects.find((p: Project) => p.id === id);
+      if (!project || !userId) return;
+      const updated = { ...project, name, updated_at: new Date().toISOString() };
+      setProjects((prev: Project[]) => prev.map(p => p.id === id ? updated : p));
+      try { await persistence.saveProject(updated, userId); } catch {}
+    };
+
+    const handleDeleteProject = async (id: string) => {
+      const userId = session?.user?.id;
+      if (!userId) return;
+      setProjects((prev: Project[]) => prev.filter(p => p.id !== id));
+      try { await persistence.deleteProject(id, userId); } catch {}
+    };
+
     // ── AI helpers ────────────────────────────────────────────────────────────
     function buildSystemPrompt(project: Project, secs: Section[], currentId: string | null) {
       const cur = secs.find(s => s.id === currentId);
@@ -245,7 +261,7 @@ Action types: set_content(data:{text}), set_goal(data:{goal}), set_key_points(da
           <AvatarMenu session={session} onSignOut={handleSignOut} />
         </div>
         {view === "dashboard" && (
-          <Dashboard projects={projects} onOpen={handleOpenProject} onNew={handleNewProject} onDelete={() => {}} />
+          <Dashboard projects={projects} onOpen={handleOpenProject} onNew={handleNewProject} onDelete={handleDeleteProject} onRename={handleRenameProject} />
         )}
         {view === "create" && (
           <CreateProject form={form} setForm={setForm} onCreate={handleCreateProject} onBack={handleBackToDashboard} creating={creating} error={createError} />
