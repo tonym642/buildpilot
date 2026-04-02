@@ -69,10 +69,33 @@ export default function BrainPanel({ isMobile, messages, isThinking, inputVal, s
 			</div>
 			<div style={{ padding: isMobile ? "10px 12px" : "12px 16px", borderTop: `1px solid ${C.borderSub}`, flexShrink: 0 }}>
 				<div style={{ display: "flex", gap: 8, alignItems: "flex-end", background: C.panelBg, border: "1px solid #1e1e26", borderRadius: 10, padding: "9px 12px" }}>
-					<textarea value={inputVal} onChange={e => setInputVal(e.target.value)}
+					<textarea value={inputVal}
+						onChange={e => {
+							setInputVal(e.target.value);
+							// auto-resize: reset then grow to fit content
+							e.target.style.height = "auto";
+							e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
+						}}
 						onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(inputVal); } }}
-						placeholder="Think out loud..." rows={1}
-						style={{ flex: 1, background: "none", border: "none", outline: "none", color: C.text, fontSize: 13, fontFamily: C.font, resize: "none", lineHeight: 1.5, maxHeight: 96 }} />
+						placeholder="Think out loud..."
+						rows={1}
+						style={{
+							flex: 1,
+							background: "none",
+							border: "none",
+							outline: "none",
+							color: C.text,
+							fontSize: 13,
+							fontFamily: C.font,
+							resize: "none",
+							lineHeight: 1.5,
+							maxHeight: 120,
+							overflowY: "auto",
+							overflowX: "hidden",
+							whiteSpace: "pre-wrap",
+							wordBreak: "break-word",
+							width: 0,       // forces flex to control width, not content
+						}} />
 					<button onClick={() => sendMessage(inputVal)} disabled={isThinking || !inputVal.trim()}
 						style={{ background: C.accent, border: "none", borderRadius: 6, padding: "7px 16px", color: "#0d0d0f", fontSize: 14, fontFamily: C.font, cursor: "pointer", fontWeight: 600, opacity: (!inputVal.trim() || isThinking) ? 0.3 : 1, flexShrink: 0 }}>
 						→
