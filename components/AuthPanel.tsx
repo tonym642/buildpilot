@@ -45,7 +45,9 @@ export default function AuthPanel({ onSignedIn }: { onSignedIn?: () => void }) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { error } = await supabase!.auth.resetPasswordForEmail(email);
+    const { error } = await supabase!.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/`,
+    });
     setLoading(false);
     if (error) setError(error.message);
     else setSent(true);
