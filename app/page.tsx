@@ -1,8 +1,5 @@
-﻿"use client";
-import dynamic from 'next/dynamic';
-
-const Page = dynamic(() => import('./page-client'), { ssr: false });
+﻿import PageClient from './page-client';
 
 export default function RootPage() {
-  return <Page />;
+  return <PageClient />;
 }

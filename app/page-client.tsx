@@ -1,18 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { supabase } from "../lib/supabaseClient";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Project, Section, Message } from "../lib/types";
-import AuthPanel from "../components/AuthPanel";
-import OnboardingPanel from "../components/OnboardingPanel";
-import Dashboard from "../components/Dashboard";
-import CreateProject from "../components/CreateProject";
-import Workspace from "../components/Workspace";
-import AvatarMenu from "../components/AvatarMenu";
-import { TEMPLATES } from "../lib/constants";
-import { genId } from "../lib/utils";
-import { persistence } from "../lib/persistence";
+import dynamic from 'next/dynamic';
+
+const PageApp = dynamic(() => import('./page-app'), { ssr: false });
+
+export default function PageClient() {
+  return <PageApp />;
+}
 
   export default function Page() {
     const [session, setSession] = useState<any>(null);
