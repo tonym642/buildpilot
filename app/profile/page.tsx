@@ -31,21 +31,42 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!supabase) { setLoading(false); return; }
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       const u = data?.user;
       if (!u) { router.replace("/"); return; }
       setUser(u);
-      setFullName(u.user_metadata?.full_name ?? "");
       setEmail(u.email ?? "");
-      setAvatarUrl(u.user_metadata?.avatar_url ?? null);
+
+      // Load persisted profile from profiles table; fall back to auth metadata
+      const { data: profile } = await supabase!
+        .from("profiles")
+        .select("full_name, avatar_url")
+        .eq("id", u.id)
+        .single();
+
+      setFullName(profile?.full_name ?? u.user_metadata?.full_name ?? "");
+      setAvatarUrl(profile?.avatar_url ?? u.user_metadata?.avatar_url ?? null);
       setLoading(false);
     });
   }, [router]);
+
+  // Ensures a profiles row exists for the current user before any write
+  async function ensureProfileRow(u: any) {
+    await supabase!.from("profiles").upsert(
+      { id: u.id, email: u.email ?? "" },
+      { onConflict: "id", ignoreDuplicates: true }
+    );
+  }
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !supabase || !user) return;
     setAvatarUploading(true);
+    setProfileMsg(null);
+
+    // Guarantee the profile row exists before touching storage
+    await ensureProfileRow(user);
+
     const ext = file.name.split(".").pop();
     const path = `${user.id}/avatar.${ext}`;
     const { error: uploadError } = await supabase.storage
@@ -58,12 +79,17 @@ export default function ProfilePage() {
     }
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
     const url = urlData.publicUrl;
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: { avatar_url: url },
-    });
-    if (updateError) {
-      setProfileMsg({ text: updateError.message, ok: false });
+
+    // Write avatar_url to profiles table (id = auth.uid() satisfies RLS)
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .upsert({ id: user.id, avatar_url: url }, { onConflict: "id" });
+
+    if (profileError) {
+      setProfileMsg({ text: profileError.message, ok: false });
     } else {
+      // Keep auth metadata in sync
+      await supabase.auth.updateUser({ data: { avatar_url: url } });
       setAvatarUrl(url);
       setProfileMsg({ text: "Photo updated.", ok: true });
     }
@@ -71,12 +97,19 @@ export default function ProfilePage() {
   }
 
   async function handleSaveProfile() {
-    if (!supabase) return;
+    if (!supabase || !user) return;
     setSavingProfile(true);
     setProfileMsg(null);
-    const { error } = await supabase.auth.updateUser({
-      data: { full_name: fullName },
-    });
+
+    // Write to profiles table — id must equal auth.uid() to satisfy RLS
+    const { error } = await supabase
+      .from("profiles")
+      .upsert({ id: user.id, full_name: fullName, email: user.email ?? "" }, { onConflict: "id" });
+
+    if (!error) {
+      // Keep auth metadata in sync
+      await supabase.auth.updateUser({ data: { full_name: fullName } });
+    }
     setSavingProfile(false);
     setProfileMsg(error ? { text: error.message, ok: false } : { text: "Name saved.", ok: true });
   }
