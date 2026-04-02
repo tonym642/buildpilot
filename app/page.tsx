@@ -186,7 +186,7 @@ import { persistence } from "../lib/persistence";
             sendMessage={() => {}}
             handleAction={() => {}}
             chatEndRef={chatEndRef}
-            updateSectionContent={() => {}}
+            updateSectionContent={(updated) => setSections(prev => prev.map(s => s.id === updated.id ? updated : s))}
             sectionFadeRef={sectionFadeRef}
             onDashboard={handleBackToDashboard}
           />
