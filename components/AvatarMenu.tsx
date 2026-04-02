@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "../lib/supabaseClient";
 import { C } from "../lib/constants";
 
 interface AvatarMenuProps {
@@ -14,7 +15,42 @@ export default function AvatarMenu({ session, onSignOut }: AvatarMenuProps) {
   const router = useRouter();
 
   const email: string = session?.user?.email ?? "";
-  const initial = email ? email[0].toUpperCase() : "U";
+  const userId: string = session?.user?.id ?? "";
+
+  const [fullName, setFullName] = useState<string>(session?.user?.user_metadata?.full_name ?? "");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(session?.user?.user_metadata?.avatar_url ?? null);
+
+  // Fetch fresh profile data from profiles table so photo + name reflect latest saves
+  useEffect(() => {
+    if (!supabase || !userId) return;
+    supabase
+      .from("profiles")
+      .select("full_name, avatar_url")
+      .eq("id", userId)
+      .single()
+      .then(({ data }) => {
+        if (data?.full_name) setFullName(data.full_name);
+        if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+      });
+  }, [userId]);
+
+  // Re-fetch when user navigates back to this page (focus event)
+  useEffect(() => {
+    if (!supabase || !userId) return;
+    function refresh() {
+      supabase!
+        .from("profiles")
+        .select("full_name, avatar_url")
+        .eq("id", userId)
+        .single()
+        .then(({ data }) => {
+          if (data?.full_name) setFullName(data.full_name);
+          if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+        });
+    }
+    window.addEventListener("focus", refresh);
+    return () => window.removeEventListener("focus", refresh);
+  }, [userId]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -26,6 +62,9 @@ export default function AvatarMenu({ session, onSignOut }: AvatarMenuProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
+  const displayName = fullName || email;
+  const initial = displayName ? displayName[0].toUpperCase() : "U";
+
   return (
     <div ref={ref} style={{ position: "relative" }}>
       <button
@@ -35,9 +74,9 @@ export default function AvatarMenu({ session, onSignOut }: AvatarMenuProps) {
           width: 36,
           height: 36,
           borderRadius: "50%",
-          background: C.accent,
+          background: avatarUrl ? "transparent" : C.accent,
           color: "#fff",
-          border: "none",
+          border: avatarUrl ? `2px solid ${C.border}` : "none",
           fontSize: 15,
           fontWeight: 700,
           fontFamily: C.font,
@@ -46,9 +85,15 @@ export default function AvatarMenu({ session, onSignOut }: AvatarMenuProps) {
           alignItems: "center",
           justifyContent: "center",
           flexShrink: 0,
+          overflow: "hidden",
+          padding: 0,
         }}
       >
-        {initial}
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+        ) : (
+          initial
+        )}
       </button>
 
       {open && (
@@ -60,15 +105,18 @@ export default function AvatarMenu({ session, onSignOut }: AvatarMenuProps) {
           border: `1px solid ${C.border}`,
           borderRadius: 12,
           boxShadow: "0 8px 24px rgba(0,0,0,0.09)",
-          minWidth: 160,
+          minWidth: 180,
           zIndex: 100,
           overflow: "hidden",
         }}>
-          {email && (
-            <div style={{ padding: "10px 16px 8px", fontSize: 12, color: C.muted, borderBottom: `1px solid ${C.borderSub}` }}>
-              {email}
-            </div>
-          )}
+          <div style={{ padding: "12px 16px 10px", borderBottom: `1px solid ${C.borderSub}` }}>
+            {fullName && (
+              <div style={{ fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 2 }}>{fullName}</div>
+            )}
+            {email && (
+              <div style={{ fontSize: 12, color: C.muted }}>{email}</div>
+            )}
+          </div>
           <button
             onClick={() => { setOpen(false); router.push("/profile"); }}
             style={menuItemStyle}
