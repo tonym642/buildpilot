@@ -129,7 +129,7 @@ import { persistence } from "../lib/persistence";
       return <div style={{ padding: 48, textAlign: "center", color: "#888", fontSize: 16 }}>Loading...</div>;
     }
 
-    if (!session && !isFallback) return <AuthPanel onSignedIn={() => setSession({ user: { id: "local-fake" } })} />;
+    if (!session) return <AuthPanel onSignedIn={() => setSession({ user: { id: "local-fake" } })} />;
     if (showOnboarding) {
       return <OnboardingPanel onDone={() => { localStorage.setItem("bp_onboarded", "1"); setShowOnboarding(false); }} />;
     }

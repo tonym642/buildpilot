@@ -51,6 +51,22 @@ export default function AuthPanel({ onSignedIn }: { onSignedIn?: () => void }) {
     else setSent(true);
   }
 
+  if (!supabase) {
+    return (
+      <div style={{ maxWidth: 340, margin: "0 auto", padding: "48px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+        <div style={{ color: "#444", fontSize: 15, textAlign: "center", lineHeight: 1.7 }}>
+          No account required in this mode.
+        </div>
+        <button
+          onClick={() => onSignedIn?.()}
+          style={{ background: "#222", color: "#fff", border: "none", borderRadius: 10, padding: "12px 32px", fontSize: 15, fontWeight: 600, fontFamily: "inherit", cursor: "pointer" }}
+        >
+          Continue
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth: 340, margin: "0 auto", padding: "48px 0", display: "flex", flexDirection: "column", alignItems: "center" }}>
       <div style={{ display: "flex", gap: 12, marginBottom: 18 }}>
