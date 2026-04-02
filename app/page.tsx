@@ -67,6 +67,15 @@ import { persistence } from "../lib/persistence";
       }
     }, []);
 
+    useEffect(() => {
+      // Load projects whenever session is available
+      const userId = session?.user?.id;
+      if (!userId) return;
+      persistence.getProjects(userId)
+        .then(setProjects)
+        .catch(() => setProjects([]));
+    }, [session]);
+
     // --- Handlers ---
     const handleSignOut = async () => {
       await (supabase as SupabaseClient)?.auth.signOut?.();
@@ -76,11 +85,16 @@ import { persistence } from "../lib/persistence";
     // Navigation handlers
     const handleOpenProject = (project: Project) => {
       setActiveProject(project);
-      persistence.getSections(project.id).then(secs => {
-        setSections(secs);
-        setActiveSectionId(project.current_target_section_id || secs[0]?.id || null);
-        setView("workspace");
-      });
+      persistence.getSections(project.id)
+        .then(secs => {
+          setSections(secs);
+          setActiveSectionId(project.current_target_section_id || secs[0]?.id || null);
+          setView("workspace");
+        })
+        .catch(() => {
+          setSections([]);
+          setView("workspace");
+        });
     };
     const handleNewProject = () => setView("create");
     const handleBackToDashboard = () => setView("dashboard");
@@ -88,6 +102,11 @@ import { persistence } from "../lib/persistence";
     // Project creation handler
     const handleCreateProject = async () => {
       setCreateError(null);
+      const userId = session?.user?.id;
+      if (!userId) {
+        setCreateError("Not signed in. Please sign in and try again.");
+        return;
+      }
       try {
         const id = genId();
         const now = new Date().toISOString();
@@ -108,18 +127,17 @@ import { persistence } from "../lib/persistence";
           created_at: now,
           updated_at: now,
         };
-        // Save to persistence
-        const updatedProjects = [...projects, project];
-        await persistence.saveProjects(updatedProjects);
+        // Save project first, then sections — await both before navigating
+        await persistence.saveProject(project, userId);
         await persistence.saveSections(id, newSections);
-        setProjects(updatedProjects);
+        setProjects(prev => [project, ...prev]);
         setActiveProject(project);
         setSections(newSections);
         setActiveSectionId(newSections[0]?.id || null);
         setForm({ name: "", type: "Book", description: "" });
         setView("workspace");
       } catch (err: any) {
-        setCreateError("Failed to create project. Please try again.");
+        setCreateError(err?.message ?? "Failed to create project. Please try again.");
       }
     };
 
