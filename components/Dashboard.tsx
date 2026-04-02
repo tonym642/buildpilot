@@ -14,6 +14,7 @@ interface DashboardProps {
 export default function Dashboard({ projects, onOpen, onNew, onDelete, onRename }: DashboardProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -98,10 +99,24 @@ export default function Dashboard({ projects, onOpen, onNew, onDelete, onRename 
                     >✎</button>
                   </div>
                 )}
-                <button
-                  onClick={() => onDelete(p.id)}
-                  style={{ background: "none", border: "none", color: C.faint, fontSize: 16, cursor: "pointer", flexShrink: 0 }}
-                >×</button>
+                {confirmDeleteId === p.id ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                    <span style={{ fontSize: 12, color: C.muted }}>Delete?</span>
+                    <button
+                      onClick={() => { onDelete(p.id); setConfirmDeleteId(null); }}
+                      style={{ background: "#b04040", border: "none", borderRadius: 6, color: "#fff", fontSize: 12, fontWeight: 600, padding: "3px 10px", cursor: "pointer", fontFamily: C.font }}
+                    >Yes</button>
+                    <button
+                      onClick={() => setConfirmDeleteId(null)}
+                      style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: 6, color: C.muted, fontSize: 12, padding: "3px 10px", cursor: "pointer", fontFamily: C.font }}
+                    >No</button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmDeleteId(p.id)}
+                    style={{ background: "none", border: "none", color: C.faint, fontSize: 16, cursor: "pointer", flexShrink: 0 }}
+                  >×</button>
+                )}
               </div>
             ))}
           </div>
