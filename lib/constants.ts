@@ -1,15 +1,37 @@
 // Design tokens and templates
 export const C = {
-  bg: "#f5f5f3",
-  border: "#e8e6e0",
-  borderSub: "#f0eee8",
-  text: "#111111",
-  muted: "#7a7a73",
-  faint: "#bdb9b0",
-  accent: "#7f9462",
-  accentBg: "#8aa05a12",
-  panelBg: "#fcfcfa",
-  cardBg: "#f9f8f5",
+  // Backgrounds
+  bg:           "#0f1117",
+  panelBg:      "#141920",
+  cardBg:       "#191f2c",
+  surface:      "#1e2436",
+
+  // Borders
+  border:       "#222a3a",
+  borderSub:    "#1b2132",
+
+  // Text
+  text:         "#e0e4f0",
+  textSub:      "#9ba5be",
+  muted:        "#566070",
+  faint:        "#232a3a",
+
+  // Accent — muted blue
+  accent:       "#4e79f5",
+  accentHover:  "#3b68e4",
+  accentText:   "#7a9fff",
+  accentBg:     "rgba(78, 121, 245, 0.08)",
+  accentBorder: "rgba(78, 121, 245, 0.20)",
+
+  // Semantic
+  error:        "#d95f5f",
+  errorBg:      "rgba(217, 95, 95, 0.08)",
+  success:      "#4aae7f",
+
+  // Shadows
+  shadow:       "0 2px 8px rgba(0,0,0,0.35)",
+  shadowMd:     "0 4px 24px rgba(0,0,0,0.5)",
+
   font: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
 };
 

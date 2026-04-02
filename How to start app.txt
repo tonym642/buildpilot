@@ -1,2 +1,4 @@
 
 run in terminal- npm run dev
+
+app conected to supabase for db and vercel for hosting and open ai for api key

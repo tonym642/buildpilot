@@ -26,21 +26,23 @@ function BulletEditor({ items, onChange }: BulletEditorProps) {
 
   const inputBase: React.CSSProperties = {
     width: "100%",
-    background: C.panelBg,
+    background: C.cardBg,
     border: `1px solid ${C.border}`,
-    borderRadius: 8,
+    borderRadius: 10,
     color: C.text,
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: C.font,
-    padding: "8px 12px",
+    padding: "10px 13px",
     outline: "none",
+    lineHeight: 1.55,
+    transition: "border 0.15s, box-shadow 0.15s",
   };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       {items.map((item, i) => (
         <div key={i} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <span style={{ color: C.accent, fontSize: 10, flexShrink: 0 }}>▸</span>
+          <span style={{ color: C.accent, fontSize: 9, flexShrink: 0, opacity: 0.7 }}>▸</span>
           <input
             value={item}
             onChange={e => {
@@ -52,7 +54,12 @@ function BulletEditor({ items, onChange }: BulletEditorProps) {
           />
           <button
             onClick={() => onChange(items.filter((_, j) => j !== i))}
-            style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 18, lineHeight: 1, padding: "0 4px", flexShrink: 0 }}
+            style={{
+              background: "none", border: "none", color: C.muted,
+              cursor: "pointer", fontSize: 18, lineHeight: 1,
+              padding: "0 4px", flexShrink: 0, opacity: 0.4,
+              transition: "opacity 0.15s",
+            }}
           >×</button>
         </div>
       ))}
@@ -62,11 +69,19 @@ function BulletEditor({ items, onChange }: BulletEditorProps) {
           onChange={e => setNewItem(e.target.value)}
           onKeyDown={e => e.key === "Enter" && add()}
           placeholder="Add item…"
-          style={{ ...inputBase, flex: 1, border: `1px dashed ${C.border}`, color: C.muted }}
+          style={{ ...inputBase, flex: 1, border: `1px dashed ${C.border}`, color: C.textSub }}
         />
         <button
           onClick={add}
-          style={{ background: C.accent, border: "none", borderRadius: 8, padding: "8px 16px", color: "#fff", fontSize: 13, fontFamily: C.font, cursor: "pointer", fontWeight: 600, flexShrink: 0 }}
+          style={{
+            background: C.accentBg, border: `1px solid ${C.accentBorder}`,
+            borderRadius: 10, padding: "10px 18px",
+            color: C.accentText, fontSize: 14, fontFamily: C.font,
+            cursor: "pointer", fontWeight: 600, flexShrink: 0,
+            transition: "background 0.15s",
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = `rgba(78, 121, 245, 0.14)`)}
+          onMouseLeave={e => (e.currentTarget.style.background = C.accentBg)}
         >+</button>
       </div>
     </div>
@@ -82,16 +97,17 @@ export default function SectionEditor({ section, onChange, isMobile }: SectionEd
 
   const inputStyle: React.CSSProperties = {
     width: "100%",
-    background: C.panelBg,
+    background: C.cardBg,
     border: `1px solid ${C.border}`,
-    borderRadius: 8,
+    borderRadius: 10,
     color: C.text,
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: C.font,
-    padding: "10px 14px",
+    padding: "11px 14px",
     outline: "none",
-    lineHeight: 1.6,
+    lineHeight: 1.65,
     boxSizing: "border-box",
+    transition: "border 0.15s, box-shadow 0.15s",
   };
 
   const labelStyle: React.CSSProperties = {
@@ -100,18 +116,24 @@ export default function SectionEditor({ section, onChange, isMobile }: SectionEd
     color: C.muted,
     letterSpacing: "0.08em",
     textTransform: "uppercase",
-    marginBottom: 7,
+    marginBottom: 8,
     display: "block",
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-      {/* Section title + accent bar */}
+    <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+      {/* Section title */}
       <div>
-        <div style={{ fontSize: isMobile ? 15 : 17, fontWeight: 700, color: C.text, marginBottom: 6 }}>
+        <div style={{
+          fontSize: isMobile ? 17 : 20,
+          fontWeight: 700,
+          color: C.text,
+          letterSpacing: "-0.025em",
+          marginBottom: 10,
+        }}>
           {section.title}
         </div>
-        <div style={{ width: 28, height: 2, background: C.accent, borderRadius: 1 }} />
+        <div style={{ width: 28, height: 2, background: C.accent, borderRadius: 1, opacity: 0.7 }} />
       </div>
 
       {c.type === "chapter" && (
@@ -138,7 +160,7 @@ export default function SectionEditor({ section, onChange, isMobile }: SectionEd
               value={c.content || ""}
               onChange={e => patch({ content: e.target.value })}
               placeholder="Write the chapter content…"
-              rows={isMobile ? 6 : 9}
+              rows={isMobile ? 7 : 10}
               style={{ ...inputStyle, resize: "vertical" }}
             />
           </div>
@@ -162,7 +184,7 @@ export default function SectionEditor({ section, onChange, isMobile }: SectionEd
             value={c.text || ""}
             onChange={e => patch({ text: e.target.value })}
             placeholder="Start writing…"
-            rows={isMobile ? 9 : 13}
+            rows={isMobile ? 10 : 14}
             style={{ ...inputStyle, resize: "vertical" }}
           />
         </div>

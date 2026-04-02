@@ -29,18 +29,19 @@ export default function BuildPanel({ isMobile, sections, activeSection, activeSe
       display: "flex",
       flexDirection: "column",
       overflow: "hidden",
-      background: C.cardBg,
+      background: C.bg,
+      minWidth: 0,
     }}>
       {isMobile ? (
-        /* Mobile: horizontal scrolling section tabs */
+        /* Mobile: horizontal scrolling section pills */
         <div style={{
           flexShrink: 0,
           overflowX: "auto",
           display: "flex",
           alignItems: "center",
-          gap: 8,
-          padding: "10px 14px",
-          borderBottom: `1px solid ${C.borderSub}`,
+          gap: 6,
+          padding: "12px 16px",
+          borderBottom: `1px solid ${C.border}`,
           scrollbarWidth: "none",
           background: C.panelBg,
         }}>
@@ -51,19 +52,21 @@ export default function BuildPanel({ isMobile, sections, activeSection, activeSe
               <button key={s.id} onClick={() => setActiveSectionId(s.id)} style={{
                 flexShrink: 0,
                 fontSize: 12,
-                padding: "5px 14px",
+                fontWeight: active ? 600 : 500,
+                padding: "6px 14px",
                 borderRadius: 20,
-                border: `1px solid ${active ? C.accent : C.border}`,
+                border: `1px solid ${active ? C.accentBorder : C.border}`,
                 background: active ? C.accentBg : "transparent",
-                color: active ? C.accent : C.muted,
+                color: active ? C.accentText : C.textSub,
                 fontFamily: C.font,
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
-                gap: 5,
+                gap: 6,
                 whiteSpace: "nowrap",
+                transition: "all 0.15s",
               }}>
-                <span style={{ fontSize: 6, color: has ? C.accent : C.faint }}>●</span>
+                <span style={{ fontSize: 5, color: has ? C.accent : C.muted, opacity: has ? 1 : 0.4 }}>●</span>
                 {s.title}
               </button>
             );
@@ -72,17 +75,17 @@ export default function BuildPanel({ isMobile, sections, activeSection, activeSe
       ) : (
         /* Desktop: sidebar + editor */
         <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
-          {/* Section list sidebar */}
+          {/* Section sidebar */}
           <div style={{
-            width: 180,
-            borderRight: `1px solid ${C.borderSub}`,
+            width: 176,
+            borderRight: `1px solid ${C.border}`,
             display: "flex",
             flexDirection: "column",
             flexShrink: 0,
             background: C.panelBg,
           }}>
             <PanelHeader label="Build" />
-            <div style={{ flex: 1, overflowY: "auto", padding: "4px 0" }}>
+            <div style={{ flex: 1, overflowY: "auto", padding: "4px 8px" }}>
               {sections.map((s: Section) => {
                 const has = hasContent(s.content_json);
                 const active = s.id === activeSectionId;
@@ -93,11 +96,11 @@ export default function BuildPanel({ isMobile, sections, activeSection, activeSe
                     style={{
                       width: "100%",
                       textAlign: "left",
-                      padding: "9px 16px",
+                      padding: "9px 10px",
                       background: active ? C.accentBg : "transparent",
                       border: "none",
-                      borderLeft: `2px solid ${active ? C.accent : "transparent"}`,
-                      color: active ? C.accent : C.muted,
+                      borderRadius: 8,
+                      color: active ? C.accentText : C.muted,
                       fontSize: 13,
                       fontFamily: C.font,
                       fontWeight: active ? 600 : 400,
@@ -105,10 +108,11 @@ export default function BuildPanel({ isMobile, sections, activeSection, activeSe
                       display: "flex",
                       alignItems: "center",
                       gap: 8,
-                      transition: "color 0.12s, background 0.12s",
+                      transition: "all 0.12s",
+                      marginBottom: 2,
                     }}
                   >
-                    <span style={{ fontSize: 6, color: has ? C.accent : C.faint, flexShrink: 0 }}>●</span>
+                    <span style={{ fontSize: 5, color: has ? C.accent : C.faint, flexShrink: 0 }}>●</span>
                     {s.title}
                   </button>
                 );
@@ -117,11 +121,16 @@ export default function BuildPanel({ isMobile, sections, activeSection, activeSe
           </div>
 
           {/* Editor area */}
-          <div ref={sectionFadeRef} style={{ flex: 1, padding: "28px 32px", overflowY: "auto" }}>
+          <div ref={sectionFadeRef} style={{
+            flex: 1,
+            padding: "32px 36px",
+            overflowY: "auto",
+            minWidth: 0,
+          }}>
             {activeSection
               ? <SectionEditor section={activeSection} onChange={updateSectionContent} isMobile={false} />
               : (
-                <div style={{ color: C.faint, fontSize: 13, marginTop: 8 }}>
+                <div style={{ color: C.muted, fontSize: 14, marginTop: 8, opacity: 0.6 }}>
                   Select a section to start writing.
                 </div>
               )
@@ -132,10 +141,10 @@ export default function BuildPanel({ isMobile, sections, activeSection, activeSe
 
       {/* Mobile editor area */}
       {isMobile && (
-        <div ref={sectionFadeRef} style={{ flex: 1, padding: "18px 16px", overflowY: "auto" }}>
+        <div ref={sectionFadeRef} style={{ flex: 1, padding: "24px 20px", overflowY: "auto", background: C.bg }}>
           {activeSection
             ? <SectionEditor section={activeSection} onChange={updateSectionContent} isMobile={true} />
-            : <div style={{ color: C.faint, fontSize: 13 }}>Select a section above.</div>
+            : <div style={{ color: C.muted, fontSize: 13, opacity: 0.6 }}>Select a section above.</div>
           }
         </div>
       )}

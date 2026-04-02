@@ -99,17 +99,17 @@ export default function AvatarMenu({ session, onSignOut }: AvatarMenuProps) {
       {open && (
         <div style={{
           position: "absolute",
-          top: 44,
+          top: 46,
           right: 0,
           background: C.panelBg,
           border: `1px solid ${C.border}`,
-          borderRadius: 12,
-          boxShadow: "0 8px 24px rgba(0,0,0,0.09)",
-          minWidth: 180,
+          borderRadius: 14,
+          boxShadow: C.shadowMd,
+          minWidth: 196,
           zIndex: 100,
           overflow: "hidden",
         }}>
-          <div style={{ padding: "12px 16px 10px", borderBottom: `1px solid ${C.borderSub}` }}>
+          <div style={{ padding: "14px 16px 12px", borderBottom: `1px solid ${C.borderSub}` }}>
             {fullName && (
               <div style={{ fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 2 }}>{fullName}</div>
             )}
@@ -120,12 +120,16 @@ export default function AvatarMenu({ session, onSignOut }: AvatarMenuProps) {
           <button
             onClick={() => { setOpen(false); router.push("/profile"); }}
             style={menuItemStyle}
+            onMouseEnter={e => (e.currentTarget.style.background = C.surface)}
+            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
           >
             Profile
           </button>
           <button
             onClick={() => { setOpen(false); onSignOut(); }}
-            style={{ ...menuItemStyle, color: "#b04040" }}
+            style={{ ...menuItemStyle, color: C.error }}
+            onMouseEnter={e => (e.currentTarget.style.background = C.errorBg)}
+            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
           >
             Sign out
           </button>
@@ -138,13 +142,14 @@ export default function AvatarMenu({ session, onSignOut }: AvatarMenuProps) {
 const menuItemStyle: React.CSSProperties = {
   display: "block",
   width: "100%",
-  background: "none",
+  background: "transparent",
   border: "none",
   textAlign: "left",
-  padding: "10px 16px",
+  padding: "11px 16px",
   fontSize: 14,
   fontWeight: 500,
   cursor: "pointer",
-  color: "#111",
+  color: C.text,
   fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  transition: "background 0.15s",
 };

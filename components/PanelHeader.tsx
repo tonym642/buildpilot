@@ -8,14 +8,14 @@ interface PanelHeaderProps {
 export default function PanelHeader({ label }: PanelHeaderProps) {
   return (
     <div style={{
-      fontSize: 13,
-      fontWeight: 700,
+      fontSize: 11,
+      fontWeight: 600,
       color: C.muted,
-      letterSpacing: "0.08em",
+      letterSpacing: "0.09em",
       textTransform: "uppercase",
-      padding: "18px 0 8px 0",
-      marginLeft: 18,
-      marginBottom: 2
+      padding: "20px 18px 10px",
+      marginBottom: 2,
+      borderBottom: `1px solid ${C.borderSub}`,
     }}>{label}</div>
   );
 }

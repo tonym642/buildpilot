@@ -90,16 +90,18 @@ import { persistence } from "../lib/persistence";
     // Navigation handlers
     const handleOpenProject = (project: Project) => {
       setActiveProject(project);
-      persistence.getSections(project.id)
-        .then(secs => {
-          setSections(secs);
-          setActiveSectionId(project.current_target_section_id || secs[0]?.id || null);
-          setView("workspace");
-        })
-        .catch(() => {
-          setSections([]);
-          setView("workspace");
-        });
+      setMessages([]);
+      Promise.allSettled([
+        persistence.getSections(project.id),
+        persistence.getMessages(project.id),
+      ]).then(([secsResult, msgsResult]) => {
+        const secs = secsResult.status === "fulfilled" ? secsResult.value : [];
+        const msgs = msgsResult.status === "fulfilled" ? msgsResult.value : [];
+        setSections(secs);
+        setMessages(msgs);
+        setActiveSectionId(project.current_target_section_id || secs[0]?.id || null);
+        setView("workspace");
+      });
     };
     const handleNewProject = () => setView("create");
     const handleBackToDashboard = () => setView("dashboard");
@@ -144,15 +146,20 @@ Action types: set_content(data:{text}), set_goal(data:{goal}), set_key_points(da
       const targetId = action.target_section === "current"
         ? activeSectionId
         : sections.find((s: Section) => s.key === action.target_section)?.id ?? activeSectionId;
-      setSections((prev: Section[]) => prev.map(s => {
-        if (s.id !== targetId) return s;
-        const c = { ...s.content_json };
-        if (action.type === "set_content" && action.data?.text) c.text = action.data.text;
-        if (action.type === "set_goal" && action.data?.goal) c.goal = action.data.goal;
-        if (action.type === "set_key_points" && action.data?.key_points) c.key_points = action.data.key_points;
-        if (action.type === "set_bullets" && action.data?.items) c.items = action.data.items;
-        return { ...s, content_json: c };
-      }));
+      setSections((prev: Section[]) => {
+        const next = prev.map(s => {
+          if (s.id !== targetId) return s;
+          const c = { ...s.content_json };
+          if (action.type === "set_content" && action.data?.text) c.text = action.data.text;
+          if (action.type === "set_goal" && action.data?.goal) c.goal = action.data.goal;
+          if (action.type === "set_key_points" && action.data?.key_points) c.key_points = action.data.key_points;
+          if (action.type === "set_bullets" && action.data?.items) c.items = action.data.items;
+          return { ...s, content_json: c };
+        });
+        const updated = next.find(s => s.id === targetId);
+        if (updated) persistence.saveSection(updated).catch(() => {});
+        return next;
+      });
       if (action.type === "next_section") {
         const idx = sections.findIndex((s: Section) => s.id === activeSectionId);
         if (idx >= 0 && idx < sections.length - 1) setActiveSectionId(sections[idx + 1].id);
@@ -169,6 +176,7 @@ Action types: set_content(data:{text}), set_goal(data:{goal}), set_key_points(da
       setMessages(nextMessages);
       setInputVal("");
       setIsThinking(true);
+      persistence.insertMessage(userMsg).catch(() => {});
       try {
         const sys = buildSystemPrompt(activeProject, sections, activeSectionId);
         const apiMsgs = nextMessages.slice(-18).map(m => ({ role: m.role, content: m.message }));
@@ -188,11 +196,14 @@ Action types: set_content(data:{text}), set_goal(data:{goal}), set_key_points(da
           createdAt: Date.now(),
         };
         setMessages([...nextMessages, aiMsg]);
+        persistence.insertMessage(aiMsg).catch(() => {});
       } catch (err: any) {
-        setMessages([...nextMessages, {
+        const errMsg: Message = {
           id: genId(), project_id: activeProject.id, role: "assistant",
           message: err?.message ?? "Something went wrong. Please try again.", actions: [], createdAt: Date.now(),
-        }]);
+        };
+        setMessages([...nextMessages, errMsg]);
+        persistence.insertMessage(errMsg).catch(() => {});
       }
       setIsThinking(false);
     }, [messages, isThinking, activeProject, sections, activeSectionId]);
@@ -246,7 +257,16 @@ Action types: set_content(data:{text}), set_goal(data:{goal}), set_key_points(da
     const isFallback = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (authLoading) {
-      return <div style={{ padding: 48, textAlign: "center", color: "#888", fontSize: 16 }}>Loading...</div>;
+      return (
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          height: "100vh", background: "#0f1117", color: "#566070",
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          fontSize: 14,
+        }}>
+          Loading…
+        </div>
+      );
     }
 
     if (!session) return <AuthPanel onSignedIn={() => setSession({ user: { id: "local-fake" } })} />;
@@ -283,7 +303,10 @@ Action types: set_content(data:{text}), set_goal(data:{goal}), set_key_points(da
             sendMessage={sendMessage}
             handleAction={handleAction}
             chatEndRef={chatEndRef}
-            updateSectionContent={(updated) => setSections(prev => prev.map(s => s.id === updated.id ? updated : s))}
+            updateSectionContent={(updated) => {
+              setSections(prev => prev.map(s => s.id === updated.id ? updated : s));
+              persistence.saveSection(updated).catch(() => {});
+            }}
             sectionFadeRef={sectionFadeRef}
             onDashboard={handleBackToDashboard}
           />

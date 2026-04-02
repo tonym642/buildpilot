@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 import { C } from "../../lib/constants";
+import GlobalStyles from "../../components/GlobalStyles";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -151,6 +152,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: C.bg, fontFamily: C.font, color: C.muted, fontSize: 15 }}>
+        <GlobalStyles />
         Loading…
       </div>
     );
@@ -159,36 +161,43 @@ export default function ProfilePage() {
   if (!supabase) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: C.bg, fontFamily: C.font }}>
+        <GlobalStyles />
         <div style={cardStyle}>
           <div style={headingStyle}>Profile</div>
-          <div style={{ color: C.muted, fontSize: 14 }}>Profile settings require Supabase to be configured.</div>
-          <button onClick={() => router.back()} style={backBtnStyle}>← Back</button>
+          <div style={{ color: C.textSub, fontSize: 14 }}>Profile settings require Supabase to be configured.</div>
+          <button onClick={() => router.back()} style={saveBtnStyle}>← Back</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: C.font, color: C.text, padding: "40px 16px" }}>
-      <div style={{ maxWidth: 440, margin: "0 auto", display: "flex", flexDirection: "column", gap: 20 }}>
+    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: C.font, color: C.text, padding: "48px 16px" }}>
+      <GlobalStyles />
+      <div style={{ maxWidth: 460, margin: "0 auto", display: "flex", flexDirection: "column", gap: 20 }}>
 
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
-          <button onClick={() => router.back()} style={{ background: "none", border: "none", color: C.muted, fontSize: 20, cursor: "pointer", lineHeight: 1, padding: 0 }}>←</button>
-          <div style={{ fontSize: 22, fontWeight: 700 }}>Profile</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+          <button
+            onClick={() => router.back()}
+            style={{ background: "none", border: "none", color: C.textSub, fontSize: 20, cursor: "pointer", lineHeight: 1, padding: "6px", borderRadius: 8, transition: "background 0.15s" }}
+            onMouseEnter={e => (e.currentTarget.style.background = C.surface)}
+            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+          >←</button>
+          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em" }}>Profile</div>
         </div>
 
         {/* Avatar + Name */}
         <div style={cardStyle}>
           <div style={sectionLabelStyle}>Photo &amp; Name</div>
 
-          {/* Avatar */}
-          <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 20 }}>
+        {/* Avatar */}
+          <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 24 }}>
             <div style={{ position: "relative", flexShrink: 0 }}>
               {avatarUrl ? (
-                <img src={avatarUrl} alt="avatar" style={{ width: 64, height: 64, borderRadius: "50%", objectFit: "cover", border: `2px solid ${C.border}` }} />
+                <img src={avatarUrl} alt="avatar" style={{ width: 68, height: 68, borderRadius: "50%", objectFit: "cover", border: `2px solid ${C.border}` }} />
               ) : (
-                <div style={{ width: 64, height: 64, borderRadius: "50%", background: C.accent, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, fontWeight: 700, color: "#fff" }}>
+                <div style={{ width: 68, height: 68, borderRadius: "50%", background: C.accent, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, fontWeight: 700, color: "#fff" }}>
                   {initial}
                 </div>
               )}
@@ -198,17 +207,18 @@ export default function ProfilePage() {
                 title="Upload photo"
                 style={{
                   position: "absolute", bottom: 0, right: 0,
-                  width: 22, height: 22, borderRadius: "50%",
-                  background: C.text, border: `2px solid ${C.panelBg}`,
-                  color: "#fff", fontSize: 11, cursor: "pointer",
+                  width: 24, height: 24, borderRadius: "50%",
+                  background: C.accent, border: `2px solid ${C.panelBg}`,
+                  color: "#fff", fontSize: 12, cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "background 0.15s",
                 }}
               >
                 {avatarUploading ? "…" : "+"}
               </button>
               <input ref={fileInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleAvatarChange} />
             </div>
-            <div style={{ fontSize: 13, color: C.muted, lineHeight: 1.5 }}>
+            <div style={{ fontSize: 13, color: C.textSub, lineHeight: 1.6 }}>
               JPG, PNG, or WebP.<br />Max 5 MB recommended.
             </div>
           </div>
@@ -275,84 +285,79 @@ export default function ProfilePage() {
 
 // --- Styles ---
 const cardStyle: React.CSSProperties = {
-  background: "#fcfcfa",
-  border: "1px solid #f0eee8",
+  background: C.panelBg,
+  border: `1px solid ${C.border}`,
   borderRadius: 18,
-  padding: "24px 28px",
-  boxShadow: "0 8px 30px rgba(0,0,0,0.04)",
+  padding: "28px 32px",
+  boxShadow: C.shadowMd,
   display: "flex",
   flexDirection: "column",
 };
 
 const sectionLabelStyle: React.CSSProperties = {
-  fontSize: 13,
+  fontSize: 11,
   fontWeight: 600,
-  color: "#7a7a73",
+  color: C.muted,
   textTransform: "uppercase",
-  letterSpacing: "0.06em",
-  marginBottom: 16,
+  letterSpacing: "0.08em",
+  marginBottom: 18,
 };
 
 const labelStyle: React.CSSProperties = {
-  fontSize: 13,
+  fontSize: 12,
   fontWeight: 500,
-  color: "#7a7a73",
-  marginBottom: 6,
+  color: C.textSub,
+  marginBottom: 7,
+  display: "block",
 };
 
 const inputStyle: React.CSSProperties = {
   fontSize: 14,
-  padding: "10px 13px",
+  padding: "11px 14px",
   borderRadius: 10,
-  border: "1px solid #e8e6e0",
-  background: "#fafafa",
+  border: `1px solid ${C.border}`,
+  background: C.cardBg,
   fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-  color: "#111",
+  color: C.text,
   outline: "none",
-  marginBottom: 14,
+  marginBottom: 16,
   width: "100%",
   boxSizing: "border-box",
+  transition: "border 0.15s, box-shadow 0.15s",
 };
 
 const saveBtnStyle: React.CSSProperties = {
-  background: "#7f9462",
+  background: C.accent,
   color: "#fff",
   border: "none",
-  borderRadius: 10,
-  padding: "10px 20px",
+  borderRadius: 12,
+  padding: "10px 22px",
   fontSize: 14,
   fontWeight: 600,
   cursor: "pointer",
   fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   alignSelf: "flex-start",
-  marginTop: 2,
-};
-
-const backBtnStyle: React.CSSProperties = {
-  background: "#7f9462",
-  color: "#fff",
-  border: "none",
-  borderRadius: 10,
-  padding: "10px 24px",
-  fontSize: 14,
-  fontWeight: 600,
-  cursor: "pointer",
-  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-  marginTop: 20,
-  alignSelf: "flex-start",
+  marginTop: 4,
+  transition: "background 0.15s",
 };
 
 const headingStyle: React.CSSProperties = {
   fontSize: 20,
   fontWeight: 700,
   marginBottom: 8,
+  letterSpacing: "-0.02em",
+  color: C.text,
 };
 
 function msgStyle(ok: boolean): React.CSSProperties {
   return {
     fontSize: 13,
-    color: ok ? "#4a7c3f" : "#b04040",
+    color: ok ? C.success : C.error,
     marginBottom: 10,
-    marginTop: -6,
+    marginTop: -8,
+    padding: "8px 12px",
+    borderRadius: 8,
+    background: ok ? "rgba(74, 174, 127, 0.08)" : C.errorBg,
+    border: `1px solid ${ok ? "rgba(74, 174, 127, 0.2)" : "rgba(217, 95, 95, 0.2)"}`,
   };
 }

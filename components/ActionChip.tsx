@@ -12,17 +12,20 @@ export default function ActionChip({ label, onClick }: ActionChipProps) {
       onClick={onClick}
       style={{
         background: C.accentBg,
-        color: C.accent,
-        border: `1px solid ${C.accent}`,
+        color: C.accentText,
+        border: `1px solid ${C.accentBorder}`,
         borderRadius: 10,
-        padding: "4px 12px",
+        padding: "5px 13px",
         fontSize: 12,
         fontWeight: 500,
         cursor: "pointer",
         marginRight: 4,
         marginBottom: 4,
-        transition: "background 0.15s"
+        transition: "background 0.15s",
+        fontFamily: C.font,
       }}
+      onMouseEnter={e => (e.currentTarget.style.background = `rgba(78, 121, 245, 0.14)`)}
+      onMouseLeave={e => (e.currentTarget.style.background = C.accentBg)}
     >
       {label}
     </button>

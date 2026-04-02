@@ -65,13 +65,15 @@ export default function Workspace(props: WorkspaceProps) {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: isMobile ? "0 14px" : "0 24px",
-        height: isMobile ? 48 : 52,
+        padding: isMobile ? "0 16px" : "0 24px",
+        height: isMobile ? 48 : 56,
         borderBottom: `1px solid ${C.border}`,
         flexShrink: 0,
-        gap: 8,
+        gap: 12,
         minWidth: 0,
+        background: C.panelBg,
       }}>
+        {/* Left: logo + project name */}
         <button
           onClick={onDashboard}
           style={{
@@ -79,58 +81,83 @@ export default function Workspace(props: WorkspaceProps) {
             border: "none",
             color: C.text,
             fontFamily: C.font,
-            fontSize: isMobile ? 12 : 13,
+            fontSize: 14,
             fontWeight: 600,
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
-            gap: 6,
+            gap: 10,
             flexShrink: 0,
+            padding: "6px 10px",
+            borderRadius: 10,
+            transition: "background 0.15s",
+            marginLeft: -10,
           }}
+          onMouseEnter={e => (e.currentTarget.style.background = C.surface)}
+          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
         >
-          <span style={{ color: C.accent }}>◈</span>
-          <span style={{ maxWidth: isMobile ? 90 : 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span style={{
+            width: 24, height: 24, borderRadius: 7,
+            background: C.accent,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 12, color: "#fff", fontWeight: 700, flexShrink: 0,
+          }}>◈</span>
+          <span style={{ maxWidth: isMobile ? 100 : 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", letterSpacing: "-0.01em" }}>
             {activeProject.name}
           </span>
         </button>
+
+        {/* Center: active section label */}
         {!isMobile && (
-          <div style={{ fontSize: 10, color: C.muted, textTransform: "uppercase", letterSpacing: "0.12em", flexShrink: 0 }}>
+          <div style={{
+            fontSize: 12,
+            color: C.muted,
+            letterSpacing: "0.06em",
+            fontWeight: 500,
+            flexShrink: 0,
+            textTransform: "uppercase",
+          }}>
             {activeSection?.title || "—"}
           </div>
         )}
+
+        {/* Right: summary preview */}
         <div style={{
-          fontSize: 10,
+          fontSize: 12,
           color: C.muted,
           overflow: "hidden",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
           minWidth: 0,
           textAlign: "right",
-          maxWidth: isMobile ? 130 : 260,
+          maxWidth: isMobile ? 120 : 240,
+          flex: isMobile ? 1 : "none",
         }}>
-          {activeProject.last_summary || "Start chatting →"}
+          {activeProject.last_summary || ""}
         </div>
       </div>
 
       {/* MOBILE TAB BAR */}
       {isMobile && (
-        <div style={{ display: "flex", borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
+        <div style={{ display: "flex", borderBottom: `1px solid ${C.border}`, flexShrink: 0, background: C.panelBg }}>
           {(["brain", "build"] as const).map(id => (
             <button
               key={id}
               onClick={() => setMobileTab(id)}
               style={{
                 flex: 1,
-                padding: "11px 0",
-                fontSize: 11,
+                padding: "13px 0",
+                fontSize: 12,
                 fontFamily: C.font,
-                letterSpacing: "0.1em",
+                fontWeight: 600,
+                letterSpacing: "0.07em",
                 textTransform: "uppercase",
                 background: "none",
                 border: "none",
                 borderBottom: `2px solid ${mobileTab === id ? C.accent : "transparent"}`,
-                color: mobileTab === id ? C.accent : C.muted,
+                color: mobileTab === id ? C.accentText : C.muted,
                 cursor: "pointer",
+                transition: "color 0.15s",
               }}
             >
               {id === "brain" ? "Brain" : "Build"}
